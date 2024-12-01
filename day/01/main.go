@@ -59,16 +59,10 @@ func parseLists(lines []string) (list1, list2 []int) {
 }
 
 func pairLists(list1, list2 []int) [][2]int {
-	pair := make([][2]int, len(list1))
-
 	slices.Sort(list1)
 	slices.Sort(list2)
 
-	for i := range len(list1) {
-		pair[i] = [2]int{list1[i], list2[i]}
-	}
-
-	return pair
+	return fp.Zip(list1, list2)
 }
 
 func getDistances(pairs [][2]int) []int {
