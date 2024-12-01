@@ -67,59 +67,24 @@ func TestParseLists(t *testing.T) {
 	}
 }
 
-func TestPairLists(t *testing.T) {
+func TestGetDistances(t *testing.T) {
 	for i, tt := range []struct {
 		list1, list2 []int
-		want         [][2]int
+		want         []int
 	}{
 		{
 			list1: []int{1},
 			list2: []int{2},
-			want:  [][2]int{{1, 2}},
+			want:  []int{1},
 		},
 		{
 			list1: []int{3, 4, 2, 1, 3, 3},
 			list2: []int{4, 3, 5, 3, 9, 3},
-			want: [][2]int{
-				{1, 3},
-				{2, 3},
-				{3, 3},
-				{3, 4},
-				{3, 5},
-				{4, 9},
-			},
+			want:  []int{2, 1, 0, 1, 2, 5},
 		},
 	} {
 		t.Run(fmt.Sprint(i), func(t *testing.T) {
-			got := pairLists(tt.list1, tt.list2)
-			assert.Equal(t, got, tt.want)
-		})
-	}
-}
-
-func TestGetDistances(t *testing.T) {
-	for i, tt := range []struct {
-		pairs [][2]int
-		want  []int
-	}{
-		{
-			pairs: [][2]int{{1, 2}},
-			want:  []int{1},
-		},
-		{
-			pairs: [][2]int{
-				{1, 3},
-				{2, 3},
-				{3, 3},
-				{3, 4},
-				{3, 5},
-				{4, 9},
-			},
-			want: []int{2, 1, 0, 1, 2, 5},
-		},
-	} {
-		t.Run(fmt.Sprint(i), func(t *testing.T) {
-			got := getDistances(tt.pairs)
+			got := getDistances(tt.list1, tt.list2)
 			assert.Equal(t, got, tt.want)
 		})
 	}

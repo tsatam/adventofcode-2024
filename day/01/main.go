@@ -23,8 +23,7 @@ func handlePart1(input string) int {
 	lines := readInput(input)
 	list1, list2 := parseLists(lines)
 
-	pairs := pairLists(list1, list2)
-	distances := getDistances(pairs)
+	distances := getDistances(list1, list2)
 
 	sum := fp.Sum(distances)
 
@@ -58,33 +57,17 @@ func parseLists(lines []string) (list1, list2 []int) {
 	return
 }
 
-func pairLists(list1, list2 []int) [][2]int {
+func getDistances(list1, list2 []int) []int {
 	slices.Sort(list1)
 	slices.Sort(list2)
 
-	return fp.Zip(list1, list2)
-}
-
-func getDistances(pairs [][2]int) []int {
-	return fp.Map(pairs, func(in [2]int) int {
-		diff := in[1] - in[0]
-		if diff < 0 {
-			return -diff
-		} else {
-			return diff
-		}
+	return fp.ZipFunc(list1, list2, func(elem1, elem2 int) int {
+		return max(elem2-elem1, elem1-elem2)
 	})
 }
 
 func similarity(list1, list2 []int) []int {
 	return fp.Map(list1, func(elem int) int {
-		return elem * fp.Reduce(list2, 0, func(curr, next int) int {
-			switch {
-			case next == elem:
-				return curr + 1
-			default:
-				return curr
-			}
-		})
+		return elem * len(fp.Filter(list2, func(i int) bool { return i == elem }))
 	})
 }
