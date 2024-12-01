@@ -1,0 +1,16 @@
+{
+    "image": "docker.io/library/golang:1.23", 
+    "name": "adventofcode-2024",
+    "workspaceMount": "",
+    "runArgs": [
+        "--userns=keep-id",
+        "--volume=${localWorkspaceFolder}:/workspaces/${localWorkspaceFolderBasename}:Z"
+	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"golang.Go"
+			]
+		}
+	}
+}
