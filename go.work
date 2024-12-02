@@ -3,4 +3,5 @@ go 1.23.3
 use (
 	./common
 	./day/01
+	./day/02
 )
