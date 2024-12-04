@@ -27,7 +27,8 @@ func handlePart1(input string) int {
 }
 
 func handlePart2(input string) int {
-	return 0
+	wordsearch := readInput(input)
+	return findXMASs(wordsearch)
 }
 
 func readInput(input string) [][]rune {
@@ -45,6 +46,48 @@ func findXs(wordsearch [][]rune) []cartesian.Point {
 		}
 	}
 	return result
+}
+
+func findXMASs(wordsearch [][]rune) int {
+	xmases := 0
+
+	for y := 1; y < len(wordsearch)-1; y++ {
+		for x := 1; x < len(wordsearch)-1; x++ {
+			if wordsearch[y][x] == 'A' {
+				if isXMAS(wordsearch, cartesian.Point{X: x, Y: y}) {
+					xmases++
+				}
+			}
+		}
+	}
+
+	return xmases
+}
+
+func isXMAS(wordsearch [][]rune, p cartesian.Point) bool {
+	x, y := p.X, p.Y
+
+	corners := []rune{
+		wordsearch[y-1][x-1],
+		wordsearch[y-1][x+1],
+		wordsearch[y+1][x-1],
+		wordsearch[y+1][x+1],
+	}
+
+	totalM, totalS := 0, 0
+
+	for _, c := range corners {
+		switch c {
+		case 'M':
+			totalM++
+		case 'S':
+			totalS++
+		default:
+			return false
+		}
+	}
+
+	return totalM == 2 && totalS == 2 && corners[0] != corners[3] && corners[1] != corners[2]
 }
 
 func checkPoint(wordsearch [][]rune, wordIdx int, direction ...cartesian.Direction) func(cartesian.Point) int {

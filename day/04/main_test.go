@@ -36,8 +36,8 @@ S.S.S.S.S.
 M.M.M.M.M.
 ..........`
 
-	want := 18
-	got := handlePart1(input)
+	want := 9
+	got := handlePart2(input)
 	assert.Equal(t, want, got)
 }
 
