@@ -1,4 +1,4 @@
-go 1.23.3
+go 1.23.4
 
 use (
 	./common
@@ -6,4 +6,5 @@ use (
 	./day/02
 	./day/03
 	./day/04
+	./day/05
 )
