@@ -74,9 +74,10 @@ func TestReadInput(t *testing.T) {
 
 func TestSimulateGuardRoute(t *testing.T) {
 	for _, tt := range []struct {
-		name string
-		lab  lab
-		want []cartesian.Point
+		name      string
+		lab       lab
+		wantRoute []cartesian.Point
+		wantLoop  bool
 	}{
 		{
 			name: "1x1 lab",
@@ -85,7 +86,7 @@ func TestSimulateGuardRoute(t *testing.T) {
 				obstacles: []cartesian.Point{},
 				guard:     cartesian.Point{X: 1, Y: 1},
 			},
-			want: []cartesian.Point{{X: 1, Y: 1}},
+			wantRoute: []cartesian.Point{{X: 1, Y: 1}},
 		},
 		{
 			name: "example lab",
@@ -103,7 +104,7 @@ func TestSimulateGuardRoute(t *testing.T) {
 				},
 				guard: cartesian.Point{X: 4, Y: 6},
 			},
-			want: []cartesian.Point{
+			wantRoute: []cartesian.Point{
 				{X: 4, Y: 6}, {X: 4, Y: 5}, {X: 4, Y: 4}, {X: 4, Y: 3}, {X: 4, Y: 2}, {X: 4, Y: 1},
 				{X: 5, Y: 1}, {X: 6, Y: 1}, {X: 7, Y: 1}, {X: 8, Y: 1},
 				{X: 8, Y: 2}, {X: 8, Y: 3}, {X: 8, Y: 4}, {X: 8, Y: 5}, {X: 8, Y: 6},
@@ -117,10 +118,145 @@ func TestSimulateGuardRoute(t *testing.T) {
 				{X: 7, Y: 8}, {X: 7, Y: 9},
 			},
 		},
+		{
+			name: "example lab obstacle 1",
+			lab: lab{
+				bounds: cartesian.Point{X: 10, Y: 10},
+				obstacles: []cartesian.Point{
+					{X: 4, Y: 0},
+					{X: 9, Y: 1},
+					{X: 2, Y: 3},
+					{X: 7, Y: 4},
+					{X: 1, Y: 6},
+					{X: 8, Y: 7},
+					{X: 0, Y: 8},
+					{X: 6, Y: 9},
+					{X: 3, Y: 6},
+				},
+				guard: cartesian.Point{X: 4, Y: 6},
+			},
+			wantLoop: true,
+		},
+		{
+			name: "example lab obstacle 2",
+			lab: lab{
+				bounds: cartesian.Point{X: 10, Y: 10},
+				obstacles: []cartesian.Point{
+					{X: 4, Y: 0},
+					{X: 9, Y: 1},
+					{X: 2, Y: 3},
+					{X: 7, Y: 4},
+					{X: 1, Y: 6},
+					{X: 8, Y: 7},
+					{X: 0, Y: 8},
+					{X: 6, Y: 9},
+					{X: 6, Y: 7},
+				},
+				guard: cartesian.Point{X: 4, Y: 6},
+			},
+			wantLoop: true,
+		},
+		{
+			name: "example lab obstacle 3",
+			lab: lab{
+				bounds: cartesian.Point{X: 10, Y: 10},
+				obstacles: []cartesian.Point{
+					{X: 4, Y: 0},
+					{X: 9, Y: 1},
+					{X: 2, Y: 3},
+					{X: 7, Y: 4},
+					{X: 1, Y: 6},
+					{X: 8, Y: 7},
+					{X: 0, Y: 8},
+					{X: 6, Y: 9},
+					{X: 7, Y: 7},
+				},
+				guard: cartesian.Point{X: 4, Y: 6},
+			},
+			wantLoop: true,
+		},
+		{
+			name: "example lab obstacle 4",
+			lab: lab{
+				bounds: cartesian.Point{X: 10, Y: 10},
+				obstacles: []cartesian.Point{
+					{X: 4, Y: 0},
+					{X: 9, Y: 1},
+					{X: 2, Y: 3},
+					{X: 7, Y: 4},
+					{X: 1, Y: 6},
+					{X: 8, Y: 7},
+					{X: 0, Y: 8},
+					{X: 6, Y: 9},
+					{X: 1, Y: 8},
+				},
+				guard: cartesian.Point{X: 4, Y: 6},
+			},
+			wantLoop: true,
+		},
+		{
+			name: "example lab obstacle 5",
+			lab: lab{
+				bounds: cartesian.Point{X: 10, Y: 10},
+				obstacles: []cartesian.Point{
+					{X: 4, Y: 0},
+					{X: 9, Y: 1},
+					{X: 2, Y: 3},
+					{X: 7, Y: 4},
+					{X: 1, Y: 6},
+					{X: 8, Y: 7},
+					{X: 0, Y: 8},
+					{X: 6, Y: 9},
+					{X: 3, Y: 8},
+				},
+				guard: cartesian.Point{X: 4, Y: 6},
+			},
+			wantLoop: true,
+		},
+		{
+			name: "example lab obstacle 6",
+			lab: lab{
+				bounds: cartesian.Point{X: 10, Y: 10},
+				obstacles: []cartesian.Point{
+					{X: 4, Y: 0},
+					{X: 9, Y: 1},
+					{X: 2, Y: 3},
+					{X: 7, Y: 4},
+					{X: 1, Y: 6},
+					{X: 8, Y: 7},
+					{X: 0, Y: 8},
+					{X: 6, Y: 9},
+					{X: 7, Y: 9},
+				},
+				guard: cartesian.Point{X: 4, Y: 6},
+			},
+			wantLoop: true,
+		},
+		{
+			name: "check 1d loop",
+			lab: readInput(`
+.#.#.#.
+#.....#
+.#.^.#.
+			`),
+			wantLoop: true,
+		},
+		{
+			name: "check trapped",
+			lab: readInput(`
+.#.
+#^#
+.#.
+			`),
+			wantLoop: true,
+		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			got := simulateGuardRoute(tt.lab)
-			assert.ElementsMatch(t, tt.want, got)
+			gotRoute, gotLoop := simulateGuardRoute(tt.lab)
+			if tt.wantRoute != nil {
+				assert.ElementsMatch(t, tt.wantRoute, gotRoute)
+			}
+			assert.Equal(t, tt.wantLoop, gotLoop)
 		})
 	}
 }

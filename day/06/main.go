@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/tsatam/adventofcode-2024/common/cartesian"
+	"github.com/tsatam/adventofcode-2024/common/fp"
 )
 
 var (
@@ -28,28 +29,22 @@ func main() {
 }
 
 func handlePart1(input string) int {
-	lab := readInput(input)
+	l := readInput(input)
 
-	visited := simulateGuardRoute(lab)
+	visited, _ := simulateGuardRoute(l)
 
 	return len(distinct(visited))
 }
 
 func handlePart2(input string) int {
-	lab := readInput(input)
+	l := readInput(input)
 
-	numObstacleAdditions := 0
+	a, _ := simulateGuardRoute(l)
+	a = distinct(a)
+	a = slices.DeleteFunc(a, l.isGuard)
+	a = fp.Filter(a, l.doesCauseLoop)
 
-	for y := range lab.bounds.Y {
-		for x := range lab.bounds.X {
-			newObstacle := cartesian.Point{X: x, Y: y}
-			if !slices.Contains(lab.obstacles, newObstacle) && newObstacle != lab.guard && checkLoop(lab, newObstacle) {
-				numObstacleAdditions++
-			}
-		}
-	}
-
-	return numObstacleAdditions
+	return len(a)
 }
 
 type lab struct {
@@ -82,63 +77,54 @@ func readInput(input string) lab {
 	return lab{bounds: bounds, obstacles: obstacles, guard: guard}
 }
 
-func simulateGuardRoute(lab lab) []cartesian.Point {
-	var simulateRecursive func(pos cartesian.Point, dir cartesian.Direction) []cartesian.Point
-
-	simulateRecursive = func(pos cartesian.Point, dir cartesian.Direction) []cartesian.Point {
-		next := pos.Move(dir)
-
-		if !lab.inBounds(next) {
-			return []cartesian.Point{pos}
-		}
-
-		if slices.Contains(lab.obstacles, next) {
-			dir = rotate[dir]
-			next = pos.Move(dir)
-		}
-
-		return append(simulateRecursive(next, dir), pos)
-	}
-
-	return simulateRecursive(lab.guard, cartesian.Up)
-}
-
-func checkLoop(lab lab, newObstacle cartesian.Point) bool {
-	lab.obstacles = append(lab.obstacles, newObstacle)
-
+func simulateGuardRoute(l lab) ([]cartesian.Point, bool) {
 	type collision struct {
 		p cartesian.Point
 		d cartesian.Direction
 	}
+	collisions := map[collision]interface{}{}
 
-	var simulateRecursive func(pos cartesian.Point, dir cartesian.Direction, collisions map[collision]interface{}) bool
+	var simulateRecursive func(pos cartesian.Point, dir cartesian.Direction) ([]cartesian.Point, bool)
 
-	simulateRecursive = func(pos cartesian.Point, dir cartesian.Direction, collisions map[collision]interface{}) bool {
+	simulateRecursive = func(pos cartesian.Point, dir cartesian.Direction) ([]cartesian.Point, bool) {
 		next := pos.Move(dir)
 
-		if !lab.inBounds(next) {
-			return false
+		if !l.inBounds(next) {
+			return []cartesian.Point{pos}, false
 		}
 
-		if slices.Contains(lab.obstacles, next) {
+		if slices.Contains(l.obstacles, next) {
 			collision := collision{p: pos, d: dir}
 			if _, ok := collisions[collision]; ok {
-				return true
+				return []cartesian.Point{pos}, true
 			} else {
 				collisions[collision] = nil
-				dir = rotate[dir]
-				next = pos.Move(dir)
+				return simulateRecursive(pos, rotate[dir])
 			}
 		}
 
-		return simulateRecursive(next, dir, collisions)
+		resultPoints, isLoop := simulateRecursive(next, dir)
+		return append(resultPoints, pos), isLoop
 	}
 
-	return simulateRecursive(lab.guard, cartesian.Up, map[collision]interface{}{})
+	return simulateRecursive(l.guard, cartesian.Up)
 }
 
 func (l lab) inBounds(p cartesian.Point) bool {
 	return p.X >= 0 && p.Y >= 0 && p.X < l.bounds.X && p.Y < l.bounds.Y
+}
+
+func (l lab) isObstacle(p cartesian.Point) bool {
+	return slices.Contains(l.obstacles, p)
+}
+
+func (l lab) isGuard(p cartesian.Point) bool {
+	return p == l.guard
+}
+
+func (l lab) doesCauseLoop(p cartesian.Point) bool {
+	_, isLoop := simulateGuardRoute(lab{bounds: l.bounds, guard: l.guard, obstacles: append(l.obstacles, p)})
+	return isLoop
 }
 
 func distinct[T comparable](in []T) []T {
