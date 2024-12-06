@@ -1,8 +1,15 @@
 package cartesian
 
-import "log"
+import (
+	"fmt"
+	"log"
+)
 
 type Point struct{ X, Y int }
+
+func (p Point) String() string {
+	return fmt.Sprintf("(%d,%d)", p.X, p.Y)
+}
 
 func (p Point) Move(direction Direction) Point {
 	switch direction {
