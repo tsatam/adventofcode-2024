@@ -29,3 +29,9 @@ func SumFrom[T any, N number](in []T, toNumber func(t T) N) N {
 func identity[N number]() N {
 	return 0
 }
+
+func Flatten[T any](in [][]T) []T {
+	return Reduce(in, []T{}, func(curr []T, next []T) []T {
+		return append(curr, next...)
+	})
+}

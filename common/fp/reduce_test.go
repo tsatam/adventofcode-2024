@@ -3,6 +3,8 @@ package fp
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestReduceEmptyReturnsIdentity(t *testing.T) {
@@ -69,4 +71,12 @@ func TestSumFrom(t *testing.T) {
 	if got != want {
 		t.Errorf("got %d, want %d", got, want)
 	}
+}
+
+func TestFlatten(t *testing.T) {
+	in := [][]int{{1, 2, 3}, {4, 5}}
+	want := []int{1, 2, 3, 4, 5}
+	got := Flatten(in)
+
+	assert.Equal(t, want, got)
 }

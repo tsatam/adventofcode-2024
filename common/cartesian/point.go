@@ -59,3 +59,11 @@ func abs(i int) int {
 		return i
 	}
 }
+
+func (p Point) Diff(other Point) Point {
+	return Point{X: other.X - p.X, Y: other.Y - p.Y}
+}
+
+func (p Point) Add(other Point) Point {
+	return Point{X: p.X + other.X, Y: p.Y + other.Y}
+}
